@@ -1,0 +1,149 @@
+{
+  "$defs": {
+    "SpeechCue": {
+      "additionalProperties": false,
+      "properties": {
+        "progress": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Progress",
+          "type": "number"
+        },
+        "vector": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "maximum": 1.0,
+              "minimum": -1.0,
+              "type": "number"
+            },
+            {
+              "maximum": 1.0,
+              "minimum": -1.0,
+              "type": "number"
+            },
+            {
+              "maximum": 1.0,
+              "minimum": -1.0,
+              "type": "number"
+            }
+          ],
+          "title": "Vector",
+          "type": "array"
+        },
+        "intensity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Intensity",
+          "type": "number"
+        }
+      },
+      "required": [
+        "progress",
+        "vector",
+        "intensity"
+      ],
+      "title": "SpeechCue",
+      "type": "object"
+    },
+    "SpeechSegment": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "cues": {
+          "items": {
+            "$ref": "#/$defs/SpeechCue"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Cues",
+          "type": "array"
+        },
+        "pause_after_s": {
+          "default": 0,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Pause After S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "text",
+        "cues"
+      ],
+      "title": "SpeechSegment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "speech-plan/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "affect_schema_id": {
+      "const": "affect-vector/v1",
+      "default": "affect-vector/v1",
+      "title": "Affect Schema Id",
+      "type": "string"
+    },
+    "utterance_id": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Utterance Id",
+      "type": "string"
+    },
+    "source_id": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Source Id",
+      "type": "string"
+    },
+    "seed": {
+      "default": 0,
+      "maximum": 4294967295,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "voice": {
+      "default": "azelma",
+      "enum": [
+        "alba",
+        "marius",
+        "javert",
+        "jean",
+        "fantine",
+        "cosette",
+        "eponine",
+        "azelma"
+      ],
+      "title": "Voice",
+      "type": "string"
+    },
+    "segments": {
+      "items": {
+        "$ref": "#/$defs/SpeechSegment"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Segments",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "utterance_id",
+    "source_id",
+    "segments"
+  ],
+  "title": "SpeechPlan",
+  "type": "object"
+}

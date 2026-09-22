@@ -1,0 +1,25 @@
+{
+  "schema_version": "speech-plan/v1",
+  "utterance_id": "alice-introduction-v1",
+  "source_id": "operator-authored-demo",
+  "voice": "azelma",
+  "seed": 7,
+  "segments": [
+    {
+      "text": "Hello. I am Alice. My voice runs locally on this computer.",
+      "cues": [
+        {"progress": 0.0, "vector": [0.3, 0.0, 0.0], "intensity": 0.4},
+        {"progress": 1.0, "vector": [0.6, 0.2, 0.1], "intensity": 0.7}
+      ],
+      "pause_after_s": 0.3
+    },
+    {
+      "text": "As I speak, my mouth and expression can follow the same timeline.",
+      "cues": [
+        {"progress": 0.0, "vector": [0.6, 0.2, 0.1], "intensity": 0.7},
+        {"progress": 1.0, "vector": [0.2, -0.1, 0.0], "intensity": 0.3}
+      ],
+      "pause_after_s": 0.1
+    }
+  ]
+}
