@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rt-agent"
+version = "0.1.0"
+description = "A listening-robot harness: typed System One question bundles drive speak/wait, facial affect and memory decisions."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "httpx>=0.27",
+    "numpy>=1.26",
+    "typer>=0.12",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+audio = [
+    "silero-vad>=5.1",
+    "onnxruntime>=1.18",
+    "faster-whisper>=1.0",
+    "soundfile>=0.12",
+    "sounddevice>=0.4.6",
+]
+llm = [
+    "openai>=1.40",
+]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "jsonschema>=4.22",
+]
+
+[project.scripts]
+rt-agent = "rt_agent.harness.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rt_agent"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test tables are module-local constants, and recorded transcript lines must stay
+# byte-identical to the fixtures they were recorded with.
+"tests/*" = ["E501", "RUF012"]
+"scripts/*" = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src"]
+plugins = ["pydantic.mypy"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "live: opt-in tests that make real network calls (enable with RT_AGENT_LIVE=1)",
+]
+filterwarnings = ["error::DeprecationWarning:rt_agent.*"]
+
+# The dev tooling is declared once as an extra (so `pip install .[dev]` works) and
+# mirrored into a PEP 735 group, which uv installs by default — so `uv run pytest`
+# works straight after a clone.
+[dependency-groups]
+dev = ["rt-agent[dev]"]

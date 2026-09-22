@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Environments
+.venv/
+venv/
+.env
+
+# Runtime output
+out/
+*.sqlite
+*.sqlite3
+models/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
