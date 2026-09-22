@@ -31,14 +31,6 @@ _ROWS_API = (
 )
 
 
-def pytest_configure(config: pytest.Config) -> None:
-    """Register the ``models`` marker without touching the shared pyproject config."""
-    config.addinivalue_line(
-        "markers",
-        "models: tests that load real ASR/VAD models (skipped when RT_AGENT_SKIP_MODELS=1)",
-    )
-
-
 def skip_without_models() -> None:
     """Skip the calling test when the environment opts out of model downloads."""
     if os.environ.get("RT_AGENT_SKIP_MODELS") == "1":

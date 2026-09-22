@@ -47,6 +47,10 @@ packages = ["src/rt_agent"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
+# ruff formats Python code blocks inside Markdown. The docs align their examples on
+# purpose (comment columns, argument columns), so the formatter is kept off them and
+# `ruff format --check` stays a statement about the code.
+extend-exclude = ["*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
@@ -76,6 +80,8 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 markers = [
     "live: opt-in tests that make real network calls (enable with RT_AGENT_LIVE=1)",
+    "models: tests that load real ASR/VAD models (skipped when RT_AGENT_SKIP_MODELS=1)",
+    "slow: tests that take more than a second or two",
 ]
 filterwarnings = ["error::DeprecationWarning:rt_agent.*"]
 

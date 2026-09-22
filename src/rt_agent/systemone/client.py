@@ -17,6 +17,8 @@ from __future__ import annotations
 import math
 import os
 import time
+from collections.abc import Callable
+from dataclasses import dataclass
 from types import TracebackType
 from typing import Any, Self
 
@@ -42,6 +44,7 @@ __all__ = [
     "KEV_BASE_URL",
     "KEV_MODEL",
     "REQUEST_ID_HEADER",
+    "SystemOneCall",
     "SystemOneClient",
     "parse_response",
 ]
@@ -223,6 +226,25 @@ def parse_response(
 # --------------------------------------------------------------------------------------
 
 
+@dataclass(frozen=True)
+class SystemOneCall:
+    """One completed bundle call, exactly as it went out and came back.
+
+    Handed to :attr:`SystemOneClient.on_call` after the response has parsed. It carries
+    the *raw* payload, not just the typed answers, because that is what a fixture has to
+    preserve: a recorded call must be re-validatable by the same strict parser the live
+    path uses, and a parsed-and-re-serialised answer would no longer prove that.
+    """
+
+    state: str
+    questions: dict[str, Any]
+    payload: Any
+    answers: BundleAnswers
+    latency_ms: float
+    request_id: str | None
+    model: str
+
+
 class SystemOneClient:
     """A long-lived System One client. Reuse one instance; the first call is the slow one.
 
@@ -242,7 +264,12 @@ class SystemOneClient:
         require_api_key: bool = True,
         expected_model: str | None = None,
         bundle_version: str = BUNDLE_VERSION,
+        on_call: Callable[[SystemOneCall], None] | None = None,
     ) -> None:
+        #: Optional observer for every successful bundle call, used by the fixture
+        #: recorder. It is called synchronously with the raw payload; an observer that
+        #: raises fails the call, so keep it to writing a file.
+        self.on_call = on_call
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.api_key_env = api_key_env
@@ -362,16 +389,35 @@ class SystemOneClient:
             raise SystemOneProtocolError(f"response body is not JSON: {error}") from error
 
     def _parse(
-        self, response: httpx.Response, questions: QuestionsWire, latency_ms: float
+        self,
+        response: httpx.Response,
+        state: str,
+        questions: QuestionsWire,
+        latency_ms: float,
     ) -> BundleAnswers:
-        return parse_response(
-            self._json(response),
+        payload = self._json(response)
+        request_id = response.headers.get(REQUEST_ID_HEADER)
+        answers = parse_response(
+            payload,
             questions,
             bundle_version=self.bundle_version,
             latency_ms=latency_ms,
-            request_id=response.headers.get(REQUEST_ID_HEADER),
+            request_id=request_id,
             expected_model=self.expected_model,
         )
+        if self.on_call is not None:
+            self.on_call(
+                SystemOneCall(
+                    state=state,
+                    questions=dict(questions),
+                    payload=payload,
+                    answers=answers,
+                    latency_ms=latency_ms,
+                    request_id=request_id,
+                    model=answers.model,
+                )
+            )
+        return answers
 
     # -- the bundle call ----------------------------------------------------------
 
@@ -389,7 +435,7 @@ class SystemOneClient:
             raise SystemOneUnavailableError(f"System One transport failure: {error}") from error
         latency_ms = (time.perf_counter() - started) * 1000.0
         self._raise_for_status(response)
-        return self._parse(response, questions, latency_ms)
+        return self._parse(response, state, questions, latency_ms)
 
     async def aask(self, state: str, questions: QuestionsWire) -> BundleAnswers:
         """Awaitable bundle call; wrap it in ``asyncio.wait_for`` for a hard deadline."""
@@ -405,7 +451,7 @@ class SystemOneClient:
             raise SystemOneUnavailableError(f"System One transport failure: {error}") from error
         latency_ms = (time.perf_counter() - started) * 1000.0
         self._raise_for_status(response)
-        return self._parse(response, questions, latency_ms)
+        return self._parse(response, state, questions, latency_ms)
 
     def ask_context(
         self, ctx: DecisionContext, bundle: QuestionBundle = QUESTION_BUNDLE_V1

@@ -311,6 +311,22 @@ class TestFaithfulnessState:
         with pytest.raises(ValueError, match="at least one turn"):
             render_faithfulness_state((), PEANUTS)
 
+    def test_a_turn_that_ends_after_the_last_one_reads_as_just_now(self) -> None:
+        """Same clamp as the state renderer: no double-negative ages in an excerpt."""
+        turns = (
+            make_utterance(
+                utterance_id="r",
+                speaker_label="ROBOT",
+                text="I will remember that.",
+                t_start_s=10.0,
+                t_end_s=18.0,
+            ),
+            make_utterance(utterance_id="c", t_start_s=11.0, t_end_s=14.0),
+        )
+        state = render_faithfulness_state(turns, PEANUTS)
+        assert "[-0.0s] ROBOT:" in state
+        assert "[--" not in state
+
     async def test_a_custom_renderer_is_used(self) -> None:
         seen: list[str] = []
 

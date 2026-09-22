@@ -1,0 +1,49 @@
+{
+  "schema_version": "scripted-llm/v1",
+  "default": "I heard that, but I do not have anything useful to add.",
+  "rules": [
+    {
+      "match": "weather doing on Thursday morning\\?\\nReply out loud",
+      "reply": "I do not have a forecast in front of me, so I would not want to guess. I can check it for you before Thursday morning."
+    },
+    {
+      "match": "remind me on Friday morning to chase them about it\\?\\nReply out loud",
+      "reply": "Yes, I will remind you on Friday morning to chase them about it."
+    },
+    {
+      "match": "\\b(what time|the time)\\b[^\\n]*\\nReply out loud",
+      "reply": "I do not have a clock I trust in this room. I would rather not guess at the time."
+    },
+    {
+      "match": "\\b(remind|reminder)\\b[^\\n]*\\nReply out loud",
+      "reply": "I can do that. I will bring it up when the time comes."
+    }
+  ],
+  "memory_default": "The two speakers were making everyday household plans together.",
+  "memory_rules": [
+    {
+      "match": "decaf after four or I'm awake till two\\.\\nWrite one sentence",
+      "reply": "S1 only drinks decaf after four, because otherwise they are awake until two."
+    },
+    {
+      "match": "between nine and eleven\\.\\nWrite one sentence",
+      "reply": "S2 says the building inspection is on Thursday morning between nine and eleven."
+    },
+    {
+      "match": "at the clinic until about ten\\.\\nWrite one sentence",
+      "reply": "S1 has a clinic appointment on Thursday morning and expects to be there until about ten."
+    },
+    {
+      "match": "there is just nothing there\\.\\nWrite one sentence",
+      "reply": "S2 has heard nothing back about a job interview for three weeks."
+    },
+    {
+      "match": "chase them about it\\?\\nWrite one sentence",
+      "reply": "S2 wants to be reminded on Friday morning to chase up the job interview."
+    },
+    {
+      "match": "I'll pick up more on the way back tonight\\.\\nWrite one sentence",
+      "reply": "S2 plans to buy more oat milk on the way home tonight."
+    }
+  ]
+}

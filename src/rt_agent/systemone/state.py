@@ -33,8 +33,14 @@ def _clean(text: str, limit: int) -> str:
 
 
 def _age_line(current: Utterance, turn: Utterance) -> str:
-    """Age of ``turn`` relative to the end of the current utterance, e.g. ``[-12.4s]``."""
-    age = current.t_end_s - turn.t_end_s
+    """Age of ``turn`` relative to the end of the current utterance, e.g. ``[-12.4s]``.
+
+    A recent turn can end *after* the current one — overlapping speech from a diarizer,
+    or the robot's own turn while the next person is already talking. The age is clamped
+    at zero for those, so an ongoing turn reads ``[-0.0s]`` ("just now") instead of the
+    double-negative ``[--3.6s]``, which is not a time anyone can read.
+    """
+    age = max(0.0, current.t_end_s - turn.t_end_s)
     return f"[-{age:.1f}s]"
 
 

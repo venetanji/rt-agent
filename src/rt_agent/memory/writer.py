@@ -138,7 +138,9 @@ def render_faithfulness_state(
         "Transcript excerpt, oldest first (ages are relative to the end of the last turn):",
     ]
     for turn in utterances:
-        age = last.t_end_s - turn.t_end_s
+        # Clamped for the same reason as in the state renderer: an overlapping or still
+        # ongoing turn must not render as a double-negative age.
+        age = max(0.0, last.t_end_s - turn.t_end_s)
         lines.append(f"[-{age:.1f}s] {turn.speaker_label}: {sanitize(turn.text, _MAX_TURN_CHARS)}")
     lines.append("Proposed memory statement:")
     lines.append(sanitize(candidate, MAX_MEMORY_CHARS))
