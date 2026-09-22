@@ -210,7 +210,7 @@ memory-summary request is recognised by its system prompt
 ```python
 ScriptedLLM(rules=(), *, default=DEFAULT_REPLY, memory_rules=(), memory_default="",
             mode="auto", latency_ms=0.0, fail_with=None, fail_count=None)
-ScriptedLLM.from_file("examples/replies.json")     # JSON, format below
+ScriptedLLM.from_file("examples/scripted_llm.json")  # JSON, format below
 ScriptedLLM.from_mapping(document, mode="memory")  # keyword arguments override the file
 ```
 

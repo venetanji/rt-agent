@@ -72,3 +72,29 @@ Line numbers are 1-based, as in the file.
 
 Expected behaviour in one sentence: **two replies (lines 12 and 24), two memories (lines 5
 and 6, plus line 9 only if sensitive storage is enabled), and silence everywhere else.**
+
+That is the design intent. What hosted Jev actually did with each of these lines, line by
+line — including the two places it read them differently (the safety gate fires from line
+20 rather than 19, and line 9's durability probability lands on the threshold rather than
+over it) — is recorded in `docs/evidence/2026-09-22-kitchen-chat-live.md`.
+
+## `scripted_llm.json`
+
+The rules file the demo replays use for text (`--scripted-rules examples/scripted_llm.json`).
+`ScriptedLLM` walks an ordered list of regexes against the last user message and returns
+the first match, so this file stands in for a remote reply model and keeps a replay
+deterministic and offline. It carries two rule sets, as the format allows
+(`scripted-llm/v1`, documented in `docs/memory.md` §6): `rules` answer the two addressed
+lines with one or two short spoken sentences in Alice's voice, and `memory_rules` write
+the one-sentence third-person summaries the `MemoryWriter` proposes — the decaf
+preference from line 5, the inspection plan from line 6, and a few more for lines that
+sit near the durability gate.
+
+Each pattern is anchored on the *end* of the transcript block it should fire for
+(`...till two\.\nWrite one sentence`), because the prompt a rule sees is a window of
+several turns: matching on a keyword alone would fire line 5's rule again on line 6.
+
+The memory sentences are not free text. Every one of them goes back to System One as a
+`memory_faithful` check, and a sentence that adds anything the transcript does not say
+is discarded — an earlier draft of the decaf rule said "decaf coffee ... in the
+afternoon" and was rejected at P = 0.64. See `docs/evidence/2026-09-22-kitchen-chat-live.md`.
